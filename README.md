@@ -10,7 +10,7 @@ Files for the HireRight CPSC 298 Machine Learning Challenge
 * OpenCV, PyTesseract (OCR)
 * BeautifulSoup, Regex (HTML/XML parsing)
 
-### FOCUS POINTS
+# FOCUS POINTS
 
 ## NAVIGATION
 * How are we going to find the fields for input values, search based on ID? (Is OCR needed or go through HTML and JavaScript route?)
