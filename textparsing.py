@@ -3,15 +3,15 @@
 # import the necessary packages
 from imutils.object_detection import non_max_suppression
 import numpy as np
-import argparse
 import time
 import cv2
 import pytesseract
 
 DIM_H = 960
 DIM_W = 1280
-MIN_CONF = 0.5
-OVERLAP = 0.7
+MIN_CONF = 0.3
+OVERLAP = 0.3
+PAD = 0.2
 PATH = "HireRightImages/wisconsin.png"
 
 # construct the argument parser and parse the arguments
@@ -19,12 +19,12 @@ def findTextBoxes(path_to_image):
     # Load the image
     image = cv2.imread(path_to_image)
     original = image.copy()
-    (h, w) = image.shape[:2]
+    (h_orig, w_orig) = image.shape[:2]
 
     # Set a new height and width as multiples of 32
     (h_new, w_new) = (DIM_H, DIM_W)
-    ratio_H = h / float(h_new)
-    ratio_W = w / float(w_new)
+    ratio_H = h_orig / float(h_new)
+    ratio_W = w_orig / float(w_new)
 
     # Resize the image
     image = cv2.resize(image, (w_new, h_new))
@@ -90,7 +90,7 @@ def findTextBoxes(path_to_image):
 
     # Remove weak boxes
     end_boxes = non_max_suppression(np.array(boxes), probs = confidences, overlapThresh = OVERLAP)
-
+    results = []
     # Loop over boxes
     for (startX, startY, endX, endY) in end_boxes:
         # Scale the boxes
@@ -99,16 +99,42 @@ def findTextBoxes(path_to_image):
         endX = int(endX * ratio_W)
         endY = int(endY * ratio_H)
 
+        # Initialize padding
+        dX = int((endX - startX) * PAD)
+        dY = int((endY - startY) * PAD)
+
+        # Apply padding
+        startX = max(0, startX - dX)
+        startY = max(0, startY - dY)
+        endX = min(w_orig, endX + (dX * 2))
+        endY = min(h_orig, endY + (dY * 2))
+
         # Get text values
+        roi = original[startY:endY, startX:endX]
+        config = ("-l eng --oem 1 --psm 7")
+        text = pytesseract.image_to_string(roi, config=config)
 
+        # Add to results
+        results.append(((startX, startY, endX, endY), text))
 
-        # draw the rectangle
-        cv2.rectangle(original, (startX, startY), (endX, endY), (0, 255, 0), 2)
-        cv2.putText()
+    # Sort the results by box coordinates.
+    results = sorted(results, key=lambda r:r[0][0])
 
-    # Show the image
-    cv2.imshow("Text Detection", original)
-    cv2.waitKey(0)
+    # Emplace results
+    for ((startX, startY, endX, endY), text) in results:
+        print("OCR TEXT")
+        print("--------")
+        print("{}\n".format(text))
+
+        # Format text for printing
+        text = "".join([c if ord(c) < 128 else "" for c in text]).strip()
+        output = original.copy()
+        cv2.rectangle(output, (startX, startY), (endX, endY), (0, 255, 0), 2)
+        cv2.putText(output, text, (startX, startY - 20), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
+
+        # Show the image
+        cv2.imshow("Text Detection", output)
+        cv2.waitKey(0)
 
 if __name__ == "__main__":
     findTextBoxes(PATH)
