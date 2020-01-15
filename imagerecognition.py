@@ -4,6 +4,7 @@
 
 import cv2
 import pytesseract
+from imutils.object_detection import non_max_suppression
 
 def basicReading(filename : str):
     '''
@@ -19,19 +20,6 @@ def basicReading(filename : str):
     text = pytesseract.image_to_string(img)
     return text
 
-def textParsing(rawtext : str):
-    '''
-    Handles parsing out elements from the raw text received.
-
-    Keyword Arguments:
-    rawtext (string): a raw block of text obtained from the image
-
-    Returns:
-    info (dict): returns a dictionary of values, with key of the field name
-                 and value of the given value.
-    '''
-    
-
 if __name__ == "__main__":
-    rawtext = basicReading('johnJohnTestCaseParties.png')
-    textParsing(rawtext);
+    rawtext = basicReading('HireRightImages/wisconsin.png')
+    print(rawtext)
