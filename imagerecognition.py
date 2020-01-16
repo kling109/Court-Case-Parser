@@ -17,7 +17,8 @@ def basicReading(filename : str):
     text (string): A block of raw text from the image.
     '''
     img = cv2.imread(filename)
-    text = pytesseract.image_to_string(img)
+    custom_oem_psm_config = r'-l eng -c preserve_interword_spaces=1'
+    text = pytesseract.image_to_string(img, config=custom_oem_psm_config)
     return text
 
 if __name__ == "__main__":
