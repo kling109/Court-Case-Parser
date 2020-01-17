@@ -9,7 +9,6 @@ a class to simplify taking full page screenshots from within chrome driver using
 * try it tho
 
 ## use:
-### simple:
 ```python
 si = ScreenImage() #instantiate new screenimage
 driver = webdriver.Chrome(options=si.ConfigDriver(webdriver.ChromeOptions()))
@@ -17,6 +16,9 @@ driver.get(base_url)
 driver.nav.to.page.for.screenshot()
 time.sleep(1.5) #ensure page is loaded
 screenshot_path = si.Screenshot(driver=driver) #take screenshot
+...
+si.ClearSession() #delete all screenshots
+driver.quit()
 ```
 
 ### customize chrome options:
