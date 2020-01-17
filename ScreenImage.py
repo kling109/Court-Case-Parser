@@ -91,13 +91,15 @@ class ScreenImage:
 #options.add_argument('headless')
 #options.add_argument('--auto-open-devtools-for-tabs')
 
-base_url = 'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
+def test():
+    base_url = 'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
 
-si = ScreenImage()
+    si = ScreenImage()
+    options = si.ConfigDriver(webdriver.ChromeOptions())
+    driver = webdriver.Chrome(options=options, executable_path=r'/Users/i530455/chromedriver')
+    driver.get(base_url)
+    time.sleep(1.5)
+    print(si.Screenshot(driver=driver))
 
-options = si.ConfigDriver(webdriver.ChromeOptions())
-driver = webdriver.Chrome(options=options, executable_path=r'/Users/i530455/chromedriver')
-driver.get(base_url)
-time.sleep(1.5)
-print(si.Screenshot(driver=driver))
+#test()
 #print(getSource("https://wcca.wicourts.gov/case.html"))
