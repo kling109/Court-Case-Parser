@@ -34,7 +34,7 @@ def toMatrix(rawText):
                 # When adding data, it may be preferred to rescale the axes
                 # to add more weight to a specific kind of spacing.
                 label = makeAssociation(word)
-                data[(x, y)] = word.lower()
+                data[(x, 3*y)] = (word.lower(), label)
                 print("At {}, {} is found with type {}.".format((x,y), word, label))
     return data
 
@@ -72,7 +72,7 @@ def findIdentifier(iden, data):
     similar = []
     similarLimit = 0
     for loc, term in data.items():
-        val = fuzz.ratio(iden, term)
+        val = fuzz.ratio(iden, term[0])
         if val > similarLimit:
             similarLimit = val
             similar = [loc]
@@ -94,6 +94,45 @@ def removeIdentifier(iden, text):
     filtered = regx.sub(iden, '', text)
     return filtered
 
+def handleList(items, full):
+    '''
+    Handles potential lists.
+
+    Keyword Arguments:
+    items (list(tuple)): A list of locations of items to check for being lists.
+    full (list(tuple)): A list of the locations of all potential list candidates.
+
+    Returns:
+    items (list(tuple)): An in-place modification of the original set of items.  If
+        a list was found, the matched location will now be a list containing all the
+        prescribed values.
+    '''
+    for i in range(len(items)):
+        # A row of items should have a common x value
+        if items[i][0][1] == items[i][1][1]:
+            row = list(filter(lambda r : r[1] == items[i][1][1], full))
+            if len(row) > 1:
+                # The object may be a row list
+                for x in range(len(row)-1):
+                    if abs(row[x][0] - row[x+1][0]) > items[i][2]:
+                        row = row[:x]
+                        break
+            if (len(row) > 1):
+                items[i][1] = row
+        # A column of items should have a common x value
+        elif items[i][0][0] == items[i][1][0]:
+            col = list(filter(lambda r : r[0] == items[i][1][0], full))
+            if len(col) > 1:
+                # The object may be a column list
+                for y in range(len(col)-1):
+                    if abs(col[y][1] - col[y+1][1]) > items[i][2]:
+                        col = col[:y]
+                        break
+            if (len(col) > 1):
+                items[i][1] = col
+    return items
+
+
 def getItem(data, iden, type):
     '''
     Gets the given identifier-value pair for a given identifier
@@ -102,13 +141,33 @@ def getItem(data, iden, type):
     Keyword Arguments:
     data (dict): The words found in the document, indexed by their location.
     iden (str): The keyword to search for and make an association to.
+    type (str): The expected classifications of the object.
+
+    Returns:
+    items (list(list(tuple(int, int), tuple(int, int), int))): The location of the identifier followed
+        by the location of the value.  The separation distance then follows that.
     '''
-    loc = findIdentifier(, dat)
-    print("Found Defendant keyword at {}".format(loc))
-    excess = [removeIdentifier("defendant", dat[x]) for x in loc]
-    print("After removing identifiers: {}".format(excess))
-    if len(excess) > 0:
-        label = makeAssociation(excess)
+    loc = findIdentifier(iden, data)
+    print("Found {} keyword at {}".format(iden, loc))
+    if (type != ["NONE"]):
+        excess = [removeIdentifier(iden, data[x][0]) for x in loc]
+        print("After removing identifiers: {}".format(excess))
+        for x in excess:
+            if len(x) > 0:
+                label = makeAssociation(excess)
+                if label == type:
+                    return (loc, loc, 0)
+    toCheck = list(filter(lambda r : data[r][1] in type, [k for k in data.keys()]))
+    print(toCheck)
+    itemLoc = [min(set(toCheck), key = lambda r : abs(c[0] - r[0]) + abs(c[1] - r[1])) for c in loc]
+    items = []
+    for i in range(len(loc)):
+        items.append([loc[i], itemLoc[i], abs(loc[i][0] - itemLoc[i][0]) + abs(loc[i][1] - itemLoc[i][1])])
+        print("Found item {} for identifier {} at {}, with a distance of {}".format(data[itemLoc[i]],
+            data[loc[i]], itemLoc[i], abs(loc[i][0] - itemLoc[i][0]) + abs(loc[i][1] - itemLoc[i][1])))
+    # Each proper identifier has been found a match.  Now, to determine if the values fall in a list
+    items = handleList(items, toCheck)
+    return items
 
 def getText(img):
     '''
@@ -123,7 +182,10 @@ def getText(img):
     rawText = ir.basicReading(img)
     print(rawText)
     dat = toMatrix(rawText)
-    pair = getItem(dat, "defendant name")
+    pair = getItem(dat, "defendant name", ["PERSON", "ORG"])
+    print(pair)
+    pair2 = getItem(dat, "file date", ["DATE", "CARDINAL"])
+    print(pair2)
 
 if __name__ == "__main__":
     getText('HireRightImages/wisconsin_official.png')
