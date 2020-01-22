@@ -18,9 +18,15 @@ def basicReading(filename : str):
     '''
     img = cv2.imread(filename)
     custom_oem_psm_config = r'-l eng -c preserve_interword_spaces=1'
-    text = pytesseract.image_to_string(img, config=custom_oem_psm_config)
+    text = pytesseract.image_to_data(img, config=custom_oem_psm_config)
     return text
 
 if __name__ == "__main__":
-    rawtext = basicReading('HireRightImages/wisconsin.png')
-    print(rawtext)
+    rawtext = basicReading('HireRightImages/wisconsin_official.png')
+    i = 0
+    doc = []
+    processedText = rawtext.split('\n')
+    for line in processedText:
+        doc.append(line.split('\t'))
+        print(doc[i])
+        i += 1

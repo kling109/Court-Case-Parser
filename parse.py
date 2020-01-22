@@ -11,6 +11,9 @@ nlp = spacy.load("en_core_web_sm")
 import en_core_web_sm
 nlp = en_core_web_sm.load()
 
+TO_FIND = [("defendant name", ["PERSON", "ORG"], "defendant"),
+           ("sex", ["NONE"], "defendant"),
+           ("date of birth", ["DATE"], "defendant")]
 
 def toMatrix(rawText):
     '''
@@ -49,13 +52,13 @@ def makeAssociation(input):
     Returns:
     classif (string): The classification of the object.
     '''
-    doc = [w.label_ for w in nlp(input).ents]
+    doc = [w.label_ for w in nlp(str(input)).ents]
     classif = 'NONE'
     if len(doc) > 0:
         classif = max(set(doc), key = doc.count)
     return classif
 
-def findIdentifier(iden, data):
+def findIdentifier(data, iden):
     '''
     Searches through the document for the item which matches the identifier
     the best.
@@ -133,7 +136,7 @@ def handleList(items, full):
     return items
 
 
-def getItem(data, iden, type):
+def getItem(data, iden, type, qualif = ""):
     '''
     Gets the given identifier-value pair for a given identifier
     and dataset.
@@ -147,7 +150,9 @@ def getItem(data, iden, type):
     items (list(list(tuple(int, int), tuple(int, int), int))): The location of the identifier followed
         by the location of the value.  The separation distance then follows that.
     '''
-    loc = findIdentifier(iden, data)
+    loc = findContext(data, qualif, iden)
+    if loc == [(-1, -1)]:
+        return [(-1, -1), (-1, -1), 0]
     print("Found {} keyword at {}".format(iden, loc))
     if (type != ["NONE"]):
         excess = [removeIdentifier(iden, data[x][0]) for x in loc]
@@ -169,6 +174,36 @@ def getItem(data, iden, type):
     items = handleList(items, toCheck)
     return items
 
+
+def findContext(data, qualif, iden):
+    '''
+    For identifiers with multiple possible instances, we may want to
+    find a contextual identifier.
+
+    Keyword Arguments:
+    data (dict): The words found in the document, indexed by their location.
+    qualif (str): The qualifier the system wants to find
+    iden (str): The identifier we want to find the correct context for
+
+    Returns:
+    loc (tuple(int, int)): The location of the correct identifier.
+    '''
+    qualifLoc = findIdentifier(data, qualif)
+    idenLoc = findIdentifier(data, iden)
+    print(qualifLoc)
+    print(idenLoc)
+    minDist = 50
+    match = [(-1, -1)]
+    for q in qualifLoc:
+        for id in idenLoc:
+            dist = abs(q[0] - id[0]) + abs(q[1] - id[1])
+            if dist < minDist:
+                minDist = dist
+                match = [id]
+            elif dist == minDist:
+                match.append(id)
+    return match
+
 def getText(img):
     '''
     Driver method for the module.  Takes an input of the
@@ -182,10 +217,9 @@ def getText(img):
     rawText = ir.basicReading(img)
     print(rawText)
     dat = toMatrix(rawText)
-    pair = getItem(dat, "defendant name", ["PERSON", "ORG"])
-    print(pair)
-    pair2 = getItem(dat, "file date", ["DATE", "CARDINAL"])
-    print(pair2)
+    for item in TO_FIND:
+        pair = getItem(dat, item[0], item[1], item[2])
 
 if __name__ == "__main__":
-    getText('HireRightImages/wisconsin_official.png')
+    #getText('HireRightImages/wisconsin_official.png')
+    getText('HireRightImages/maricopa.png')
