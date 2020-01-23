@@ -21,12 +21,18 @@ def basicReading(filename : str):
     text = pytesseract.image_to_data(img, config=custom_oem_psm_config)
     return text
 
-if __name__ == "__main__":
-    rawtext = basicReading('HireRightImages/wisconsin_official.png')
-    i = 0
+def buildText(filename: str):
+    '''
+    Gets text from an image, then formats the data into useable fassion.
+    '''
+    rawtext = basicReading(filename)
     doc = []
     processedText = rawtext.split('\n')
     for line in processedText:
-        doc.append(line.split('\t'))
-        print(doc[i])
-        i += 1
+        curr = line.split('\t')
+        print([curr[2]] + curr[4:])
+        doc.append([curr[2]] + curr[4:])
+    return doc[1:]
+
+if __name__ == "__main__":
+    buildText('HireRightImages/wisconsin_official.png')
