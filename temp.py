@@ -221,6 +221,18 @@ def findItem(itemName : str, data : dict):
             itemLocs.append(loc)
     return itemLocs
 
+def matchItemStrict(itemName : str, data : dict):
+    '''
+    Finds all occurances of an existing known item in the document.
+    '''
+    itemLocs = []
+    similarLimit = 90
+    for loc, term in data.items():
+        val = fuzz.token_sort_ratio(itemName, term[0])
+        if val > similarLimit:
+            itemLocs.append(loc)
+    return itemLocs
+
 
 def getNames(idens : list, data : dict):
     '''
@@ -259,6 +271,41 @@ def getNames(idens : list, data : dict):
                     else:
                         nameDict[id[0]].append(items[i])
     return nameDict
+
+def getDefendantInfo(data : dict):
+    '''
+    Finds all the defendants in the document, and returns them along with their
+    relevant information: sex and date of birth.
+    '''
+    names = getNames([["Defendant Name(s)", ["defendant", "name", "defendant name"],["defendant"]]], data)
+    dobLocs = findItem("date of birth", data)
+    sLocs = findItem("sex", data)
+    nameList = names.values()
+    defendantDict = {}
+    for n in nameList:
+        defendantDict[n] = {}
+        nameLocs = matchItemStrict(n, data)
+        minDistDoB = 500
+        choiceLoc = (-1, -1)
+        for nloc in nameLocs:
+            for dloc in dobLocs:
+                dist = manhattan(nloc, dloc)
+                if dist < minDistDoB:
+                    minDistDoB = dist
+                    choiceLoc = dloc
+        if choiceLoc == (-1, -1):
+            defendantDict[n]["Date of Birth"] = ""
+        else:
+            dates = makeMatch(choiceLoc, ["DATE", "CARDINAL"], data)
+            minDistdate = 300
+            dateChoice = ""
+            for d in range(len(dates[0])):
+                dist = manhattan(choiceLoc, dates[0][d])
+                if dist < minDistdate and len(expandTerm(dates[0][d], data)) < len(dates[0][d]) + 5:
+                    minDistdate = dist
+                    dateChoice = expandTerm(dates[0][d])
+        for nloc in nameLocs:
+
 
 
 if __name__ == "__main__":
