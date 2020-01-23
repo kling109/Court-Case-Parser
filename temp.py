@@ -54,7 +54,7 @@ def getFullText(data : dict):
     '''
     text = ""
     for v in data.values():
-        text += str(v) + " "
+        text += str(v[0]) + " "
     return text
 
 
@@ -121,7 +121,7 @@ def extendTermLeft(loc : tuple, data : dict):
     result = ""
     for k in data.keys():
         if k[1] > y_0 - 15 and k[1] < y_0 + 15 and k[0] + data[k][1] > dist_l and k[0] < x_0:
-            result =  extendTermLeft(k, data) + " " + data[k][0]
+            result =  data[k][0] + " " +  extendTermLeft(k, data)
             break
     return result
 
@@ -137,7 +137,7 @@ def extendTermRight(loc : tuple, data : dict):
     result = ""
     for k in data.keys():
         if k[1] > y_0 - 15 and k[1] < y_0 + 15 and k[0] < dist_r and k[0] > x_0:
-            result = data[k][0] + " " + extendTermRight(k, data)
+            result = extendTermRight(k, data) + " " + data[k][0]
             break
     return result
 
@@ -160,16 +160,16 @@ def makeMatch(idLoc : tuple, expectedType : list, data : dict):
     '''
     matches = []
     seenTerms = []
-    maxDist = 450
+    maxDist = 500
     for k in data.keys():
         dist = manhattan(k, idLoc)
-        if k != idLoc and dist < maxDist+50:
+        if k != idLoc and dist < maxDist:
             fullTerm = extendTerm(k, data).replace(data[idLoc][0], '').strip()
             fullType = makeAssociation(fullTerm)
             if fullType in expectedType and fullTerm not in seenTerms:
                 seenTerms.append(fullTerm)
-                maxDist = dist
-    return seenTerms
+                matches.append(k)
+    return [matches, seenTerms]
 
 
 def checkContext(idNames : list, expectedContx : list, data : dict):
@@ -188,7 +188,7 @@ def checkContext(idNames : list, expectedContx : list, data : dict):
         expected context.
     '''
     matchingContx = []
-    maxDist = 300
+    maxDist = 500
     for id in idNames:
         for cont in expectedContx:
             contxLocs = findItem(cont, data)
@@ -214,7 +214,7 @@ def findItem(itemName : str, data : dict):
     itemLocs (list): A list of the sufficiently matching locations.
     '''
     itemLocs = []
-    similarLimit = 50
+    similarLimit = 70
     for loc, term in data.items():
         val = fuzz.ratio(itemName, term[0])
         if val > similarLimit:
@@ -227,7 +227,7 @@ def getNames(idens : list, data : dict):
     Extracts names of individuals from the document based on their identifiers.
 
     Keyword Arguments:
-    idNames (list): The set of identifiers that one wishes to search for.  Includes
+    idens (list): The set of identifiers that one wishes to search for.  Includes
         both the literal identifiers and the contexts.
     data (dict): The data set to search.
 
@@ -238,18 +238,31 @@ def getNames(idens : list, data : dict):
     for id in idens:
         idMatch = checkContext(id[1], id[2], data)
         items = []
-        bestFit = 500
+        locs = []
         for m in idMatch:
             termMatch = makeMatch(m, ["PERSON", "ORG", "NORP"], data)
-            for i in range(len(termMatch)):
-                if termMatch[i] not in items:
-                    items.append(termMatch[i])
-            nameDict[id[0]] = items
+            for i in range(len(termMatch[1])):
+                if termMatch[1][i] not in items:
+                    locs.append(termMatch[0][i])
+                    items.append(termMatch[1][i])
+        minDist = 500
+        for match in idMatch:
+            for it in locs:
+                dist = manhattan(match, it)
+                if dist < minDist:
+                    minDist = dist
+        for match in idMatch:
+            for i in range(len(locs)):
+                if manhattan(match, locs[i]) < minDist + 30:
+                    if id[0] not in nameDict:
+                        nameDict[id[0]] = [items[i]]
+                    else:
+                        nameDict[id[0]].append(items[i])
     return nameDict
 
 
 if __name__ == "__main__":
-    data = getRawData("HireRightImages/maricopa.png")
+    data = getRawData("HireRightImages/florida.png")
     grid = assembleData(data)
     samplematch = checkContext(["defendant", "name", "defendant name"], ["defendant"], grid)
     print(samplematch)
@@ -259,3 +272,4 @@ if __name__ == "__main__":
     #     assoc = makeAssociation(val[0])
     #     print("Key: {} Word: {} NER: {}".format(key, val, assoc))
     print(getNames([["Defendant Name(s)", ["defendant", "name", "defendant name"],["defendant"]]], grid))
+    # print(getFullText(grid))
