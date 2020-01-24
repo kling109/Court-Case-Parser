@@ -12,6 +12,8 @@ nlp = spacy.load("en_core_web_sm")
 import en_core_web_sm
 nlp = en_core_web_sm.load()
 
+PARSEERRORS = ['rn)']
+
 def manhattan(t1 : tuple, t2 : tuple):
     '''
     Computes the Manhattan distance between two
@@ -78,9 +80,10 @@ def assembleData(rawData : list):
     data = {}
     for wordInfo in rawData:
         if len(wordInfo[-1]) > 0 and not (wordInfo[-1].isspace()):
-            x = int(wordInfo[3])
-            y = int(wordInfo[4])
-            data[(x, 5*y)] = (wordInfo[-1].lower(), int(wordInfo[-4]))
+            if wordInfo[-1] not in PARSEERRORS:
+                x = int(wordInfo[3])
+                y = int(wordInfo[4])
+                data[(x, 5*y)] = (wordInfo[-1].lower(), int(wordInfo[-4]))
     return data
 
 def makeAssociation(input : str):
@@ -117,11 +120,11 @@ def extendTermLeft(loc : tuple, data : dict):
     width = data[loc][1]
     x_0 = loc[0]
     y_0 = loc[1]
-    dist_l = x_0 - 15
+    dist_l = x_0 - 20
     result = ""
     for k in data.keys():
         if k[1] > y_0 - 15 and k[1] < y_0 + 15 and k[0] + data[k][1] > dist_l and k[0] < x_0:
-            result =  data[k][0] + " " +  extendTermLeft(k, data)
+            result =  extendTermLeft(k, data) + " " + data[k][0]
             break
     return result
 
@@ -133,11 +136,11 @@ def extendTermRight(loc : tuple, data : dict):
     width = data[loc][1]
     x_0 = loc[0]
     y_0 = loc[1]
-    dist_r = x_0 + width + 15
+    dist_r = x_0 + width + 20
     result = ""
     for k in data.keys():
         if k[1] > y_0 - 15 and k[1] < y_0 + 15 and k[0] < dist_r and k[0] > x_0:
-            result = extendTermRight(k, data) + " " + data[k][0]
+            result = data[k][0] + " " + extendTermRight(k, data)
             break
     return result
 
@@ -214,7 +217,7 @@ def findItem(itemName : str, data : dict):
     itemLocs (list): A list of the sufficiently matching locations.
     '''
     itemLocs = []
-    similarLimit = 70
+    similarLimit = 80
     for loc, term in data.items():
         val = fuzz.ratio(itemName, term[0])
         if val > similarLimit:
@@ -228,7 +231,7 @@ def matchItemStrict(itemName : str, data : dict):
     itemLocs = []
     similarLimit = 90
     for loc, term in data.items():
-        val = fuzz.token_sort_ratio(itemName, term[0])
+        val = fuzz.token_sort_ratio(itemName, extendTerm(loc, data))
         if val > similarLimit:
             itemLocs.append(loc)
     return itemLocs
@@ -265,12 +268,13 @@ def getNames(idens : list, data : dict):
                     minDist = dist
         for match in idMatch:
             for i in range(len(locs)):
-                if manhattan(match, locs[i]) < minDist + 30:
+                if manhattan(match, locs[i]) < minDist + 15:
                     if id[0] not in nameDict:
                         nameDict[id[0]] = [items[i]]
                     else:
                         nameDict[id[0]].append(items[i])
     return nameDict
+
 
 def getDefendantInfo(data : dict):
     '''
@@ -279,44 +283,59 @@ def getDefendantInfo(data : dict):
     '''
     names = getNames([["Defendant Name(s)", ["defendant", "name", "defendant name"],["defendant"]]], data)
     dobLocs = findItem("date of birth", data)
-    sLocs = findItem("sex", data)
-    nameList = names.values()
+    sKeyLocs = findItem("sex", data)
+    nameList = names["Defendant Name(s)"]
     defendantDict = {}
     for n in nameList:
         defendantDict[n] = {}
-        nameLocs = matchItemStrict(n, data)
-        minDistDoB = 500
-        choiceLoc = (-1, -1)
-        for nloc in nameLocs:
-            for dloc in dobLocs:
-                dist = manhattan(nloc, dloc)
-                if dist < minDistDoB:
-                    minDistDoB = dist
-                    choiceLoc = dloc
-        if choiceLoc == (-1, -1):
-            defendantDict[n]["Date of Birth"] = ""
-        else:
-            dates = makeMatch(choiceLoc, ["DATE", "CARDINAL"], data)
-            minDistdate = 300
-            dateChoice = ""
+        minDistDate = 500
+        dateChoice = ""
+        # Make this function choose the date of birth that is closest to the
+        # name first
+        for dob in dobLocs:
+            dates = makeMatch(dob, ["DATE", "CARDINAL"], data)
             for d in range(len(dates[0])):
-                dist = manhattan(choiceLoc, dates[0][d])
-                if dist < minDistdate and len(expandTerm(dates[0][d], data)) < len(dates[0][d]) + 5:
-                    minDistdate = dist
-                    dateChoice = expandTerm(dates[0][d])
-        for nloc in nameLocs:
+                dist = manhattan(dates[0][d], dob)
+                if dist < minDistDate:
+                    minDistDate = dist
+                    dateChoice = dates[1][d]
 
+    return defendantDict
+
+
+def isList(keyword : str, expected : list, data : dict):
+    '''
+    Checks if the data is in a list.
+    '''
+    keywordLocs = findItem(keyword, data)
+    for k in keywordLocs:
+        # Find the elements below the keyword
+        x_0 = k[0]
+        y_0 = k[1]
+        x_1 = k[0] + data[k][1]
+        for item in data.keys():
+            x_t = item[0]
+            y_t = item[1]
+            if x_t > x_0 - 15 and x_t < x_1 + 15 and y_t > y_0 and data[item][0] in expected:
+                # Found a list
+                return True
+    return False
 
 
 if __name__ == "__main__":
-    data = getRawData("HireRightImages/florida.png")
+    data = getRawData("HireRightImages/wisconsin_official.png")
     grid = assembleData(data)
-    samplematch = checkContext(["defendant", "name", "defendant name"], ["defendant"], grid)
-    print(samplematch)
-    for m in samplematch:
-        print(makeMatch(m, ["PERSON", "ORG", "NORP"], grid))
-    # for key, val in grid.items():
-    #     assoc = makeAssociation(val[0])
-    #     print("Key: {} Word: {} NER: {}".format(key, val, assoc))
-    print(getNames([["Defendant Name(s)", ["defendant", "name", "defendant name"],["defendant"]]], grid))
-    # print(getFullText(grid))
+    if (isList("relationship", ["plaintiff", "defendant"], grid)):
+        print(True)
+    else:
+        samplematch = checkContext(["defendant", "name", "defendant name"], ["defendant"], grid)
+        print(samplematch)
+        for m in samplematch:
+            print(makeMatch(m, ["PERSON", "ORG", "NORP"], grid))
+        # for key, val in grid.items():
+        #     assoc = makeAssociation(val[0])
+        #     print("Key: {} Word: {} NER: {}".format(key, val, assoc))
+        print(getNames([["Defendant Name(s)", ["defendant", "name", "defendant name"],["defendant"]]], grid))
+        # print(getFullText(grid))
+        print(getDefendantInfo(grid))
+        print(False)
