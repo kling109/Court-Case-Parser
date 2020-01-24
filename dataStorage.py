@@ -6,49 +6,6 @@ import datetime
 
 # Will be given a single dictionary from a picture parsing class that contains candidate's case data.
 # Testing variable for candidate's case data
-__CASE__ = {
-    "courtCaseID": "001",
-    "fName": "John",
-    "mName": "Bob",
-    "lName": "Smith",
-    "gender": "Boy",
-    "dob": "01/01/1984",
-    "jName": "Justice",
-    "jState": "South Carolina",
-    "offDate": "02/02/2002",
-    "arrDate": "02/03/2002",
-    "fileDate": "02/05/2002",
-    "disDate": "03/03/2002",
-    "chargeStat": "Assault",
-    "chargeDisp": "Trial",
-    "chargeSent": "Fine",
-    "prisTime": "None",
-    "jailTime": "None",
-    "probation": "None",
-    "fine": "1,500",    
-    }
-
-__CASE2__ = {
-    "courtCaseID": "002",
-    "fName": "John",
-    "mName": "Bob",
-    "lName": "Smith",
-    "gender": "Boy",
-    "dob": "01/01/1984",
-    "jName": "Justice",
-    "jState": "South Carolina",
-    "offDate": "12/02/2005",
-    "arrDate": "12/03/2005",
-    "fileDate": "12/05/2005",
-    "disDate": "11/03/2005",
-    "chargeStat": "Sexual Assault",
-    "chargeDisp": "Trial",
-    "chargeSent": "Prison",
-    "prisTime": "5 Years",
-    "jailTime": "None",
-    "probation": "None",
-    "fine": "0",    
-    }
 
 class DataStorage:
     #######################################################################
@@ -153,13 +110,57 @@ class DataStorage:
 
 #######################################################################
 #=====================================================================#
-#======================== END OF PROGRAM =============================#            
+#========================= END OF CLASS ==============================#            
 #=====================================================================#   
 #######################################################################
 
 
 # Driver program
 if __name__ == "__main__":
+    __CASE__ = {
+        "courtCaseID": "001",
+        "fName": "John",
+        "mName": "Bob",
+        "lName": "Smith",
+        "gender": "Boy",
+        "dob": "01/01/1984",
+        "jName": "Justice",
+        "jState": "South Carolina",
+        "offDate": "02/02/2002",
+        "arrDate": "02/03/2002",
+        "fileDate": "02/05/2002",
+        "disDate": "03/03/2002",
+        "chargeStat": "Assault",
+        "chargeDisp": "Trial",
+        "chargeSent": "Fine",
+        "prisTime": "None",
+        "jailTime": "None",
+        "probation": "None",
+        "fine": "1,500",    
+        }
+
+    __CASE2__ = {
+        "courtCaseID": "002",
+        "fName": "John",
+        "mName": "Bob",
+        "lName": "Smith",
+        "gender": "Boy",
+        "dob": "01/01/1984",
+        "jName": "Justice",
+        "jState": "South Carolina",
+        "offDate": "12/02/2005",
+        "arrDate": "12/03/2005",
+        "fileDate": "12/05/2005",
+        "disDate": "11/03/2005",
+        "chargeStat": "Sexual Assault",
+        "chargeDisp": "Trial",
+        "chargeSent": "Prison",
+        "prisTime": "5 Years",
+        "jailTime": "None",
+        "probation": "None",
+        "fine": "0",    
+        }
+    
 
     dataStorage = DataStorage()
     dataStorage.clearData()
