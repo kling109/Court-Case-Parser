@@ -24,13 +24,15 @@ def basicReading(filename : str):
 def buildText(filename: str):
     '''
     Gets text from an image, then formats the data into useable fassion.
+
+    Keyword Arguments:
+    filename (str): the path to the image to query text from.
     '''
     rawtext = basicReading(filename)
     doc = []
     processedText = rawtext.split('\n')
     for line in processedText:
         curr = line.split('\t')
-        print([curr[2]] + curr[4:])
         doc.append([curr[2]] + curr[4:])
     return doc[1:]
 
