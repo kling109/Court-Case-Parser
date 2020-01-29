@@ -1,5 +1,6 @@
 # Hire Right - Background Check API
 Tristan Chilvers, Trevor Kling, Miles Milosevich, Matt Raymond
+<br/><br/><br/><br/>
 
 ## OVERVIEW
 ### Approach
