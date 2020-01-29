@@ -199,7 +199,12 @@ class ImageParsing:
             if k != idLoc and dist < maxDist:
                 fullTerm = self.extendTerm(k, data).replace(data[idLoc][0], '').strip()
                 fullType = self.makeAssociation(fullTerm)
+                nums = regx.split(r'[^\d]', fullTerm)
+                nums = [n for n in nums if n]
                 if fullType in expectedType and fullTerm not in seenTerms:
+                    seenTerms.append(fullTerm)
+                    matches.append(k)
+                elif "LOC" in expectedType and fullType == "DATE" and nums != None and len(nums[-1]) == 5:
                     seenTerms.append(fullTerm)
                     matches.append(k)
         return [matches, seenTerms]
@@ -393,7 +398,9 @@ class ImageParsing:
                             and k[0] < addrChoiceLoc[0] + data[addrChoiceLoc][1] + 50
                             and k[1] > addrChoiceLoc[1]
                             and k[1] < addrChoiceLoc[1] + minheight):
-                            if regx.split(r'[^\d]', self.extendTerm(k, data).strip())[-1] is not "":
+                            nums = regx.split(r'[^\d]', self.extendTerm(k, data).strip()).remove("")
+                            nums = [n for n in nums if n]
+                            if nums != [] and len(nums[-1]) == 5:
                                 minheight = k[1]
                                 toAdd = " " + self.extendTerm(k, data).strip()
             defendantDict[n]["Address"] = fullAddrLine +  toAdd
@@ -680,7 +687,38 @@ class ImageParsing:
             i += 1
         return finalDefendants
 
-    def parseData(self, path : str):
+
+    def getJurisdiction(self, counties : list, data : dict):
+        '''
+        Finds the proper jurisdiction for a given case from the list of jurisdictions
+        found on prior webpages and searching for the term "county."
+
+        Keyword Arguments:
+        counties (list): A list containing all the previously seen county values
+        data (dict): A dictionary of the data parsed from the image.
+
+        Returns:
+        jurisdiction (str): A string of the given county.
+        '''
+        # coun = self.findItem("county", data)
+        # countyChoice = ""
+        # if len(coun) > 0:
+        #     for c in coun:
+        #         minDist = 200
+        #         places = self.makeMatch(c, ["ORG", "LOC", "GPE", "PERSON"], data)
+        #         for p in places[0]:
+        #             dist = self.manhattan(p, c)
+        #             if dist < minDist:
+        #                 minDist = dist
+        #                 countyChoice = data[p]
+        # else:
+        for c in counties:
+            if len(c) == 1:
+                countyChoice = c[0]
+                break
+        return countyChoice[0]
+
+    def parseData(self, path : str, county : list):
         '''
         Takes an input of a file path, then extracts the relevant information from
         the document.
@@ -702,10 +740,12 @@ class ImageParsing:
         else:
             defn = self.getDefendantInfo(grid)
             charge = self.getChargeInfo(grid)
+        jur = self.getJurisdiction(county, grid)
         parsed = charge
         parsed["Defendants"] = defn
+        parsed["Jurisdiction"] = jur
         return parsed
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/wisconsin_official.png"))
+    print(p.parseData("HireRightImages/wisconsin_official.png", [[],[],[]]))
