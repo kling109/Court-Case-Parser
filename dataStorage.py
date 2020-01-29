@@ -162,9 +162,9 @@ if __name__ == "__main__":
         }
     
 
-    dataStorage = DataStorage()
-    dataStorage.clearData()
-    #dataStorage.recordData(__CASE__)
+    dataStorage = DataStorage("Smith", "John", "Bill",datetime.datetime(1954, 4, 4))
+    #dataStorage.clearData()
+    dataStorage.recordData(__CASE__)
     #dataStorage.recordData(__CASE2__)
     dataStorage.printData()
-    dataStorage.getFileName()
+    #dataStorage.getFileName()
