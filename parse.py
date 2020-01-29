@@ -197,9 +197,9 @@ class ImageParsing:
         for k in data.keys():
             dist = self.manhattan(idLoc, k)
             if k != idLoc and dist < maxDist:
-                fullTerm = self.extendTerm(k, data).replace(data[idLoc][0], '').strip()
+                fullTerm = self.extendTerm(k, data).replace(data[idLoc][0], '').strip().replace(':,;', "")
                 fullType = self.makeAssociation(fullTerm)
-                nums = regx.split(r'[^\d]', fullTerm)
+                nums = regx.split(r'[^\d]', data[k][0])
                 nums = [n for n in nums if n]
                 if fullType in expectedType and fullTerm not in seenTerms:
                     seenTerms.append(fullTerm)
@@ -277,7 +277,7 @@ class ImageParsing:
         itemLocs = []
         similarLimit = 90
         for loc, term in data.items():
-            val = fuzz.token_sort_ratio(itemName, self.extendTerm(loc, data))
+            val = fuzz.token_sort_ratio(itemName, self.extendTerm(loc, data).replace(':,;', ""))
             if val > similarLimit:
                 itemLocs.append(loc)
         toRemove = []
@@ -308,12 +308,10 @@ class ImageParsing:
         nameDict = {}
         for id in idens:
             idMatch = self.checkContext(id[1], id[2], data)
-            print(idMatch)
             items = []
             locs = []
             for m in idMatch:
                 termMatch = self.makeMatch(m, ["PERSON", "ORG", "NORP"], data)
-                print(termMatch)
                 for i in range(len(termMatch[1])):
                     if termMatch[1][i] not in items:
                         locs.append(termMatch[0][i])
@@ -433,8 +431,9 @@ class ImageParsing:
         chargeInfo = {}
         dates = []
         for k in data.keys():
-            if DATE_REGX.fullmatch(data[k][0].strip()) != None:
-                dates.append([k, data[k][0]])
+            val = regx.sub('^[\\\/\)\(]|[\\\/\)\(]$', '', data[k][0].strip())
+            if DATE_REGX.fullmatch(val) != None:
+                dates.append([k, val])
         fileLoc = self.findItem("filing", data) + self.findItem("filed", data)
         offenseLoc = self.matchItemStrict("offense date", data)
         arrestLoc = self.matchItemStrict("arrest date", data)
@@ -443,7 +442,7 @@ class ImageParsing:
         jailLoc = self.findItem("jail", data)
         fineLoc = self.findItem("fine", data)
         probationLoc = self.findItem("probation", data)
-
+        
         if len(fileLoc) > 0:
             fileDate = ""
             minDistFile = 300
@@ -728,19 +727,22 @@ class ImageParsing:
         '''
         Gets the case number from the given document.
         '''
-        caseNo = self.matchItemStrict("case number", data)
-        caseNo += self.matchItemStrict("case no.",data)
-        caseNo += self.matchItemStrict("case #", data)
+        caseNo = self.findItem("case", data)
+        exc = ["number", "#", "no.", "no", "num"]
         minDist = 1000
 
         caseNoChoice = ""
         for c in caseNo:
+            toCheck = c
             nums = self.makeMatch(c, ["CASENO"], data)
             for n in nums[0]:
-                dist = self.manhattan(c, n)
-                if dist < minDist:
-                    minDist = dist
-                    caseNoChoice = data[n][0]
+                if data[n][0] not in exc:
+                    dist = self.manhattan(toCheck, n)
+                    if dist < minDist:
+                        minDist = dist
+                        caseNoChoice = data[n][0]
+                else:
+                    toCheck = n
         return caseNoChoice
 
     def parseData(self, path : str, county : list):
