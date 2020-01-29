@@ -33,6 +33,7 @@ def buildText(filename: str):
     processedText = rawtext.split('\n')
     for line in processedText:
         curr = line.split('\t')
+        print([curr[2]] + curr[4:])
         doc.append([curr[2]] + curr[4:])
     return doc[1:]
 

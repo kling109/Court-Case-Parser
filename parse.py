@@ -193,7 +193,7 @@ class ImageParsing:
         '''
         matches = []
         seenTerms = []
-        maxDist = 500
+        maxDist = 1000
         for k in data.keys():
             dist = self.manhattan(idLoc, k)
             if k != idLoc and dist < maxDist:
@@ -204,9 +204,13 @@ class ImageParsing:
                 if fullType in expectedType and fullTerm not in seenTerms:
                     seenTerms.append(fullTerm)
                     matches.append(k)
-                elif "LOC" in expectedType and fullType == "DATE" and nums != None and len(nums[-1]) == 5:
+                elif "LOC" in expectedType and fullType == "DATE" and len(nums) > 0 and len(nums[-1]) == 5:
                     seenTerms.append(fullTerm)
                     matches.append(k)
+                elif expectedType == ["CASENO"]:
+                    if len(nums) > 0 and len(nums[-1]) >= 4:
+                        seenTerms.append(fullTerm)
+                        matches.append(k)
         return [matches, seenTerms]
 
 
@@ -304,15 +308,17 @@ class ImageParsing:
         nameDict = {}
         for id in idens:
             idMatch = self.checkContext(id[1], id[2], data)
+            print(idMatch)
             items = []
             locs = []
             for m in idMatch:
                 termMatch = self.makeMatch(m, ["PERSON", "ORG", "NORP"], data)
+                print(termMatch)
                 for i in range(len(termMatch[1])):
                     if termMatch[1][i] not in items:
                         locs.append(termMatch[0][i])
                         items.append(termMatch[1][i])
-            minDist = 500
+            minDist = 1000
             for match in idMatch:
                 for it in locs:
                     dist = self.manhattan(match, it)
@@ -429,7 +435,7 @@ class ImageParsing:
         for k in data.keys():
             if DATE_REGX.fullmatch(data[k][0].strip()) != None:
                 dates.append([k, data[k][0]])
-        fileLoc = self.findItem("filing", data)
+        fileLoc = self.findItem("filing", data) + self.findItem("filed", data)
         offenseLoc = self.matchItemStrict("offense date", data)
         arrestLoc = self.matchItemStrict("arrest date", data)
         dispositionLoc = self.matchItemStrict("disposition date", data)
@@ -701,7 +707,7 @@ class ImageParsing:
         jurisdiction (str): A string of the given county.
         '''
         # coun = self.findItem("county", data)
-        # countyChoice = ""
+        countyChoice = ""
         # if len(coun) > 0:
         #     for c in coun:
         #         minDist = 200
@@ -710,13 +716,32 @@ class ImageParsing:
         #             dist = self.manhattan(p, c)
         #             if dist < minDist:
         #                 minDist = dist
-        #                 countyChoice = data[p]
+        #                 countyChoice = data[p][0]
         # else:
         for c in counties:
-            if len(c) == 1:
-                countyChoice = c[0]
+            if c != None:
+                countyChoice = c
                 break
-        return countyChoice[0]
+        return countyChoice
+
+    def getCaseNum(self, data : dict):
+        '''
+        Gets the case number from the given document.
+        '''
+        caseNo = self.matchItemStrict("case number", data)
+        caseNo += self.matchItemStrict("case no.",data)
+        caseNo += self.matchItemStrict("case #", data)
+        minDist = 1000
+
+        caseNoChoice = ""
+        for c in caseNo:
+            nums = self.makeMatch(c, ["CASENO"], data)
+            for n in nums[0]:
+                dist = self.manhattan(c, n)
+                if dist < minDist:
+                    minDist = dist
+                    caseNoChoice = data[n][0]
+        return caseNoChoice
 
     def parseData(self, path : str, county : list):
         '''
@@ -731,7 +756,7 @@ class ImageParsing:
         '''
         data = self.getRawData(path)
         grid = self.assembleData(data)
-        rel = self.isList("relationship", ["plaintiff", "defendant"], grid)
+        rel = self.isList("relationship", ["plaintiff", "defendant", "judge"], grid)
         defn = {}
         charge = {}
         if (rel != (-1, -1)):
@@ -740,12 +765,14 @@ class ImageParsing:
         else:
             defn = self.getDefendantInfo(grid)
             charge = self.getChargeInfo(grid)
+        case = self.getCaseNum(grid)
         jur = self.getJurisdiction(county, grid)
         parsed = charge
         parsed["Defendants"] = defn
         parsed["Jurisdiction"] = jur
+        parsed["Case Number"] = case
         return parsed
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/wisconsin_official.png", [[],[],[]]))
+    print(p.parseData("HireRightImages/wisconsin_official.png", []))
