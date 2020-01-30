@@ -323,7 +323,7 @@ def isList(keyword : str, expected : list, data : dict):
 
 
 if __name__ == "__main__":
-    data = getRawData("HireRightImages/wisconsin_official.png")
+    data = getRawData("HireRightImages/wisconsin.png")
     grid = assembleData(data)
     if (isList("relationship", ["plaintiff", "defendant"], grid)):
         print(True)
