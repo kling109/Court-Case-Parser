@@ -208,7 +208,7 @@ class ImageParsing:
                     seenTerms.append(fullTerm)
                     matches.append(k)
                 elif expectedType == ["CASENO"]:
-                    if len(nums) > 0 and len(nums[-1]) >= 4:
+                    if len(nums) > 0 and len(nums[-1]) >= 1:
                         seenTerms.append(fullTerm)
                         matches.append(k)
         return [matches, seenTerms]
@@ -325,10 +325,19 @@ class ImageParsing:
             for match in idMatch:
                 for i in range(len(locs)):
                     if self.manhattan(match, locs[i]) < minDist + 15:
+                        newStr = items[i].replace(',', "").replace(';', "").replace(':', "").strip()
                         if id[0] not in nameDict:
-                            nameDict[id[0]] = [items[i]]
+                            nameDict[id[0]] = [newStr]
                         else:
-                            nameDict[id[0]].append(items[i])
+                            maxSim = 0
+                            for n in nameDict[id[0]]:
+                                for keyword in id[1]:
+                                    newStr = newStr.replace(keyword, "")
+                                val = fuzz.token_sort_ratio(n, newStr)
+                                if val > maxSim:
+                                    maxSim = val
+                            if maxSim < 90:
+                                nameDict[id[0]].append(newStr)
         return nameDict
 
 
@@ -727,7 +736,7 @@ class ImageParsing:
         '''
         Gets the case number from the given document.
         '''
-        caseNo = self.findItem("case", data)
+        caseNo = self.findItem("case", data) + self.findItem("no.", data)
         exc = ["number", "#", "no.", "no", "num"]
         minDist = 1000
 
@@ -777,4 +786,4 @@ class ImageParsing:
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/wisconsin.png", []))
+    print(p.parseData("HireRightImages/oklahoma.png", []))
