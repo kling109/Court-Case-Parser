@@ -96,6 +96,13 @@ class ScreenImage:
             time.sleep(0.001)
 
     def Screenshot(self,driver: webdriver.Chrome, strURL = 'current') -> None:
+        existingFiles = []
+        for filename in os.listdir(self.ScreenshotLocation):
+            path = os.path.join(self.ScreenshotLocation,filename)
+            if(not os.path.isfile(path)):
+                continue
+            existingFiles.append(path)
+
         if(strURL != 'current'):
             driver.get(strURL)
         if(platform.system() == 'Darwin'):
@@ -120,33 +127,53 @@ class ScreenImage:
         press("enter")
         time.sleep(0.1)
 
-        filefilter = driver.current_url.replace("https://","").strip()
-        filefilter = filefilter.replace("www.","").strip()
-        filefilter = filefilter.replace('?','_')
-        filefilter = filefilter.replace('/','_')
+        file = ''
+        attempts = 0
+        while(file == ''):
+            for filename in os.listdir(self.ScreenshotLocation):
+                path = os.path.join(self.ScreenshotLocation,filename)
+                if(not os.path.isfile(path) or path in existingFiles):
+                    continue
+                file = path
+            attempts += 1
+            time.sleep(0.5)
+            if(attempts>30):
+                file = 'ERR'
+                raise RuntimeError('Screenshot Timeout: No new files in directory. [{}]'.format(driver.current_url))
+                return None
 
-        #print(filefilter)
-        time.sleep(2.0)
+        if(file == 'ERR'):
+            filefilter = driver.current_url.replace("https://","").strip()
+            filefilter = filefilter.replace("http://","").strip()
+            filefilter = filefilter.replace("www.","").strip()
 
-        matchedfiles = []
+            filefilter = filefilter.replace('?','_')
+            filefilter = filefilter.replace('/','_')
 
-        for filename in os.listdir(self.ScreenshotLocation):
-            path = os.path.join(self.ScreenshotLocation,filename)
-            if(not os.path.isfile(path)):
-                continue
-            if(filefilter in filename):
-                matchedfiles.append(path)
-        latest_file = max(matchedfiles, key=os.path.getctime) #uses glob
+            matchedfiles = []
 
-        now = time.time()
-        oneminute_ago = now - 60
-        if(os.path.getctime(latest_file) > oneminute_ago):
-            self.CreatedScreenshots.append(latest_file)
-            return latest_file
+            for filename in os.listdir(self.ScreenshotLocation):
+                path = os.path.join(self.ScreenshotLocation,filename)
+                if(not os.path.isfile(path)):
+                    continue
+                if(filefilter in filename):
+                    matchedfiles.append(path)
+            if(len(matchedfiles) == 0):
+                raise RuntimeError('Screenshot not taken: No files matched. [filefilter: {}]'.format(filefilter))
+
+            latest_file = max(matchedfiles, key=os.path.getctime) #uses glob
+
+            now = time.time()
+            oneminute_ago = now - 60
+            if(os.path.getctime(latest_file) > oneminute_ago):
+                self.CreatedScreenshots.append(latest_file)
+                return latest_file
+            else:
+                raise RuntimeError('Screenshot not taken: No matched files are recent. [filefilter: {}, matchedfiles: {}]'.format(filefilter,matchedfiles))
+                return None
         else:
-            raise RuntimeError('Screenshot not taken.')
-            return None
-
+            self.CreatedScreenshots.append(file)
+            return file
 
 
 def test1():
