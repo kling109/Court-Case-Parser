@@ -12,7 +12,7 @@ class DataStorage:
     # CONSTRUCTOR
 
     # Will default to strings in parameter if no arguments are given    
-    def __init__(self, _lName="lname", _fName="fname", _mName="mname", _dob=datetime.datetime(1984, 6, 6)):
+    def __init__(self, _lName="lname", _fName="fname", _mName="mname", _dob=datetime.datetime(1900, 1, 1)):
         self.__LNAME = _lName
         self.__FNAME = _fName
         self.__MNAME = _mName
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         }
     
 
-    dataStorage = DataStorage("Smith", "John", "Bill",datetime.datetime(1954, 4, 4))
+    dataStorage = DataStorage()
     #dataStorage.clearData()
     dataStorage.recordData(__CASE__)
     #dataStorage.recordData(__CASE2__)
