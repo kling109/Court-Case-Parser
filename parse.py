@@ -32,7 +32,7 @@ class ImageParsing:
         Returns:
         d (int): the distance
         '''
-        if t1[1] - 200 < t2[1]:
+        if t1[1] - 300 < t2[1]:
             d = abs(t1[0] - t2[0]) + abs(t1[1] - t2[1])
         else:
             d = 10000
@@ -582,7 +582,7 @@ class ImageParsing:
                         if dist < minDistProbName:
                             minDistJailName = dist
                             choice = prob
-                    minDistProbChoice = 500
+                    minDistProbChoice = 1000
                     probationChoice = ""
                     if choice != (0, 0):
                         for k in data.keys():
@@ -786,4 +786,4 @@ class ImageParsing:
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/oklahoma.png", []))
+    print(p.parseData("HireRightImages/wisconsin_full.png", []))
