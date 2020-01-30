@@ -442,7 +442,7 @@ class ImageParsing:
         jailLoc = self.findItem("jail", data)
         fineLoc = self.findItem("fine", data)
         probationLoc = self.findItem("probation", data)
-        
+
         if len(fileLoc) > 0:
             fileDate = ""
             minDistFile = 300
@@ -777,4 +777,4 @@ class ImageParsing:
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/wisconsin_official.png", []))
+    print(p.parseData("HireRightImages/wisconsin.png", []))
