@@ -402,7 +402,7 @@ class ImageParsing:
                             and k[0] < addrChoiceLoc[0] + data[addrChoiceLoc][1] + 50
                             and k[1] > addrChoiceLoc[1]
                             and k[1] < addrChoiceLoc[1] + minheight):
-                            nums = regx.split(r'[^\d]', self.extendTerm(k, data).strip()).remove("")
+                            nums = regx.split(r'[^\d]', self.extendTerm(k, data).strip())
                             nums = [n for n in nums if n]
                             if nums != [] and len(nums[-1]) == 5:
                                 minheight = k[1]
@@ -442,7 +442,7 @@ class ImageParsing:
         jailLoc = self.findItem("jail", data)
         fineLoc = self.findItem("fine", data)
         probationLoc = self.findItem("probation", data)
-        
+
         if len(fileLoc) > 0:
             fileDate = ""
             minDistFile = 300
@@ -777,4 +777,4 @@ class ImageParsing:
 
 if __name__ == "__main__":
     p = ImageParsing()
-    print(p.parseData("HireRightImages/wisconsin_official.png", []))
+    print(p.parseData("HireRightImages/wisconsin.png", []))
