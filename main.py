@@ -1,14 +1,11 @@
 import time
 from selenium import webdriver
 
-# imports
-from selenium import webdriver
-
-
-# function that get's the html from a web url
-def getSource(strURL):
-    browser = webdriver.Chrome()
-    browser.get(strURL)
-    return browser.page_source
-
-print(getSource("http://google.com"))
+driver = webdriver.Chrome()
+driver.get('http://www.google.com/');
+time.sleep(5) # Let the user actually see something!
+search_box = driver.find_element_by_name('q')
+search_box.send_keys('ChromeDriver')
+search_box.submit()
+time.sleep(5) # Let the user actually see something!
+driver.quit()
