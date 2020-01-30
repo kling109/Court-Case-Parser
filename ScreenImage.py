@@ -19,6 +19,8 @@ class ScreenImage:
         if(not os.path.isdir(self.ScreenshotLocation)):
             os.mkdir(self.ScreenshotLocation)
         #options = driver.ChromeOptions()
+
+        # ToDO: this line doesnt seem to work
         options.add_experimental_option("prefs",{'download.default_directory': self.ScreenshotLocation+'/',"directory_upgrade": True})
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
@@ -35,21 +37,23 @@ class ScreenImage:
                 continue
             os.remove(path)
 
-    def Screenshot(self,driver: webdriver.Chrome, strURL = 'current') -> None:
+    def Screenshot(self, driver: webdriver.Chrome, strURL = 'current') -> None:
         if(strURL != 'current'):
             driver.get(strURL)
         if(platform.system() == 'Darwin'):
             #OpenDeveloper = Keys.ALT+Keys.COMMAND+"i"
             #OpenConsole = Keys.COMMAND+Keys.SHIFT+"p"
-            hotkey('alt', 'command', 'i')
+            hotkey('option', 'command', 'i')
             time.sleep(1.5)
             hotkey('command', 'shift', 'p')
+
         elif(platform.system() == 'Windows' or platform.system() == 'Linux'):
             #OpenDeveloper = Keys.CTRL+Keys.SHIFT+"i"
             #OpenConsole = Keys.CTRL+Keys.SHIFT+"p"
             hotkey('ctrl', 'shift', 'i')
             time.sleep(1.5)
             hotkey('ctrl', 'shift', 'p')
+
         time.sleep(1.5)
         write("screenshot")
         time.sleep(0.1)
@@ -87,17 +91,18 @@ class ScreenImage:
 
 
 
-#ChromeOptions.addArguments("--kiosk");
-#options.add_argument('headless')
-#options.add_argument('--auto-open-devtools-for-tabs')
+if __name__ == "__main__":
+    #ChromeOptions.addArguments("--kiosk");
+    #options.add_argument('headless')
+    #options.add_argument('--auto-open-devtools-for-tabs')
 
-base_url = 'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
+    base_url = 'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
 
-si = ScreenImage()
+    si = ScreenImage()
 
-options = si.ConfigDriver(webdriver.ChromeOptions())
-driver = webdriver.Chrome(options=options, executable_path=r'/Users/i530455/chromedriver')
-driver.get(base_url)
-time.sleep(1.5)
-print(si.Screenshot(driver=driver))
-#print(getSource("https://wcca.wicourts.gov/case.html"))
+    options = si.ConfigDriver(webdriver.ChromeOptions())
+    driver = webdriver.Chrome(options=options, executable_path=r'/Users/i530455/chromedriver')
+    driver.get(base_url)
+    time.sleep(1.5)
+    print(si.Screenshot(driver=driver))
+    #print(getSource("https://wcca.wicourts.gov/case.html"))

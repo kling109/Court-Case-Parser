@@ -1,4 +1,5 @@
-# Test main file
+import time
+from selenium import webdriver
 
 # imports
 from selenium import webdriver
