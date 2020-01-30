@@ -20,12 +20,15 @@ class ScreenImage:
             os.mkdir(self.ScreenshotLocation)
         #options = driver.ChromeOptions()
         options.add_experimental_option("prefs",{'download.default_directory': self.ScreenshotLocation+'/',"directory_upgrade": True})
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option('useAutomationExtension', False)
+        #options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        #options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument('--auto-open-devtools-for-tabs')
+        #options.add_argument("--kiosk")
+        #options.add_argument('headless')
+
         return options
 
     def getSource(self,browser: webdriver.Chrome, strURL):
-
         browser.get(strURL)
         return browser.page_source
 
@@ -35,20 +38,75 @@ class ScreenImage:
                 continue
             os.remove(path)
 
+    def CleanPage(self, driver: webdriver.Chrome):
+        #driver.execute_script("console.log('nice!!');")
+        numElements = driver.execute_script("return document.getElementsByTagName('*').length;")
+        for i in range(0,numElements):
+            """print(driver.execute_script('''
+                    var i = {};
+                    var all = document.getElementsByTagName('*');
+                    function isFooter(node, int){{
+                        console.log(''+int+' | '+node.nodeName);
+                        if(node.nodeName=="FOOTER"||node.nodeName=="footer"||node.id=="footer"||(node.nodeType==1&&node.classList.contains("footer"))){{
+                            return true;
+                        }}
+                        else if(node.parentNode!=null){{
+                            return isFooter(node.parentNode,int+1);
+                        }}
+                        else{{
+                            return false;
+                        }}
+                    }}
+                    return ''+i+' | '+all[i].nodeName+' | '+all[i].id+' | '+all[i].classList+' | '+isFooter(all[i],0)+' | '+all.length;'''.format(i)))
+            """
+            driver.execute_script("""
+                    /*function isFooter(node){{
+                        if(node.nodeName=="FOOTER"||node.nodeName=="footer"||node.id=="footer"||(node.nodeType==1&&node.classList.contains("footer"))){{
+                            return true;
+                        }}
+                        else if(node.parentNode!=null){{
+                            return isFooter(node.parentNode);
+                        }}
+                        else{{
+                            return false;
+                        }}
+                    }}*/
+                    var allElements = document.getElementsByTagName("*");
+                    var i = {};
+                    //console.log(allElements[i].nodeName);
+                    //if(!isFooter(allElements[i])){{
+                        if(allElements[i].nodeName=="IMG")
+                        {{
+                            allElements[i].style.visibility = "gone";
+                        }}
+                        else if(allElements[i].textContent!="")
+                        {{
+                            allElements[i].style.background = "none";
+                            allElements[i].style.color = "#000";
+                        }}
+                        else
+                        {{
+                            allElements[i].style.background = "none";
+                            allElements[i].style.color = "#FFF";
+                    //    }}
+                    }}
+            """.format(i))
+            time.sleep(0.001)
+
     def Screenshot(self,driver: webdriver.Chrome, strURL = 'current') -> None:
         if(strURL != 'current'):
             driver.get(strURL)
         if(platform.system() == 'Darwin'):
             #OpenDeveloper = Keys.ALT+Keys.COMMAND+"i"
             #OpenConsole = Keys.COMMAND+Keys.SHIFT+"p"
-            hotkey('alt', 'command', 'i')
-            time.sleep(1.5)
+            #hotkey('alt', 'command', 'i')
+            #time.sleep(1.5)
             hotkey('command', 'shift', 'p')
         elif(platform.system() == 'Windows' or platform.system() == 'Linux'):
             #OpenDeveloper = Keys.CTRL+Keys.SHIFT+"i"
             #OpenConsole = Keys.CTRL+Keys.SHIFT+"p"
-            hotkey('ctrl', 'shift', 'i')
-            time.sleep(1.5)
+            #hotkey('ctrl', 'shift', 'i')
+            #time.sleep(1.5)
             hotkey('ctrl', 'shift', 'p')
         time.sleep(1.5)
         write("screenshot")
@@ -87,12 +145,8 @@ class ScreenImage:
 
 
 
-#ChromeOptions.addArguments("--kiosk");
-#options.add_argument('headless')
-#options.add_argument('--auto-open-devtools-for-tabs')
-
-def test():
-    base_url = 'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
+def test1():
+    base_url = 'https://www.w3schools.com/'#'https://www.oscn.net/dockets/GetCaseInformation.aspx?db=blaine&number=CV-2017-00046&cmid=15958'#'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
 
     si = ScreenImage()
     options = si.ConfigDriver(webdriver.ChromeOptions())
@@ -100,6 +154,20 @@ def test():
     driver.get(base_url)
     time.sleep(1.5)
     print(si.Screenshot(driver=driver))
+    time.sleep(10)
+    si.ClearSession()
 
-#test()
+def test2():
+    base_url = 'https://stackoverflow.com/questions/10244280/selenium-tests-crash-randomly-while-executing-javascript'#'https://www.w3schools.com/'#'https://www.oscn.net/dockets/GetCaseInformation.aspx?db=blaine&number=CV-2017-00046&cmid=15958'#'https://wcca.wicourts.gov/caseDetail.html?caseNo=2020SC000301&countyNo=40&index=0'
+    si = ScreenImage()
+    options = si.ConfigDriver(webdriver.ChromeOptions())
+    driver = webdriver.Chrome(options=options, executable_path=r'/Users/i530455/chromedriver')
+    driver.get(base_url)
+    time.sleep(3.5)
+    si.CleanPage(driver=driver)
+
+
+test2()
+
+time.sleep(10)
 #print(getSource("https://wcca.wicourts.gov/case.html"))
