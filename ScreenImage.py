@@ -105,6 +105,12 @@ class ScreenImage:
 
         if(strURL != 'current'):
             driver.get(strURL)
+
+        readyState = driver.execute_script('return document.readyState')
+        while(readyState!='complete'):
+            readyState = driver.execute_script('return document.readyState')
+            time.sleep(0.05)
+            
         if(platform.system() == 'Darwin'):
             #OpenDeveloper = Keys.ALT+Keys.COMMAND+"i"
             #OpenConsole = Keys.COMMAND+Keys.SHIFT+"p"
@@ -119,7 +125,7 @@ class ScreenImage:
             #time.sleep(1.5)
             hotkey('ctrl', 'shift', 'p')
 
-        time.sleep(1.5)
+        time.sleep(1)
         write("screenshot")
         time.sleep(0.1)
         press("down")
