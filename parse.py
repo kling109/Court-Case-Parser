@@ -417,7 +417,7 @@ class ImageParsing:
                                 minheight = k[1]
                                 toAdd = " " + self.extendTerm(k, data).strip()
             defendantDict[n]["Address"] = fullAddrLine +  toAdd
-
+        
         return defendantDict
 
     def getChargeInfo(self, data : dict):
