@@ -39,6 +39,7 @@ class DataStorage:
             _candData = json.load(read_file)
 
         # Append case data to candidate
+        self.__CAND__ = _candData
         self.__CAND__.append(case)
 
         # Write updated candidate's data to file
@@ -162,9 +163,9 @@ if __name__ == "__main__":
         }
     
 
-    dataStorage = DataStorage()
+    dataStorage = DataStorage("testing")
     #dataStorage.clearData()
-    dataStorage.recordData(__CASE__)
-    #dataStorage.recordData(__CASE2__)
+    #dataStorage.recordData(__CASE__)
+    dataStorage.recordData(__CASE2__)
     dataStorage.printData()
-    #dataStorage.getFileName()
+    dataStorage.getFileName()
