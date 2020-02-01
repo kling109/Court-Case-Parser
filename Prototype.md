@@ -1,6 +1,6 @@
 # Background Check Documentation
 Tristan Chilvers, Trevor Kling, Miles Milosevich, Matt Raymond
-<br/><br/><br/>
+<br/><br/><br/><br/>
 
 ## OVERVIEW
 ### Approach and Structure
@@ -12,7 +12,7 @@ There were a couple initial approaches for parsing the data once we have found t
 <br/><br/>
 ### Constraints
 There were a number of constraints our approach faced. Regarding navigation, not every website is similar in design. This results in a decent number of Regex formulas being implemented that will only function for a limited number of websites. Furthermore, websites with additional pages to pass through to reach the candidate's information may not work with our navigation process. This applies towards websites with Captcha's as well. Additionally, there are times when the program may not accurately classify a word correctly when looking at a page.
-<br/><br/><br/>
+<br/><br/><br/><br/>
 
 # Court Case Parser
 ## Navigation Component
