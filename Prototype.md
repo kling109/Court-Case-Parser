@@ -124,6 +124,10 @@ Will completely wipe all data on the candidate's file.
 printData()
 ```
 Will print all data in the candidate's file to terminal.
+```
+getFileName()
+```
+Prints the file name to terminal and returns it as a string.
 
 ### 2. Dependencies
 1. python 3
