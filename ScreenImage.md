@@ -1,12 +1,5 @@
 # ScreenImage.py
-a class to simplify taking full page screenshots from within chrome driver using selenium.
-
-## what works:
-* takes screenshot on mac
-
-## what might not work:
-* taking screenshot on windows or linux
-* try it tho
+a class to simplify taking full page screenshots from within chrome driver using selenium, along with webpage preprocessing for improved OCR performance
 
 ## use:
 ```python
@@ -15,6 +8,7 @@ driver = webdriver.Chrome(options=si.ConfigDriver(webdriver.ChromeOptions()))
 driver.get(base_url)
 driver.nav.to.page.for.screenshot()
 time.sleep(1.5) #ensure page is loaded
+si.CleanPage(driver=driver) #remove background elements 
 screenshot_path = si.Screenshot(driver=driver) #take screenshot
 ...
 si.ClearSession() #delete all screenshots
@@ -28,6 +22,3 @@ options.add_argument('no_girls_allowed')
 options.add_argument('except_for_matt')
 driver = webdriver.Chrome(options=options)
 ```
-
-## future:
-* function to clean website elements before screenshot for use in ocr applications
