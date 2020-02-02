@@ -94,18 +94,41 @@ Once the keywords are established, the program moves on to filling the fields.  
 
 ## Data Serialization Component
 ### 1.  Introduction
-The Data serialization module `dataStorage.py` takes the returned lisit from the Text Parsing module and stores it into the corresponding candidate's JSON file.
-#### 1.1 Basic Usage
+The Data serialization module `dataStorage.py` takes the returned list from the Text Parsing module and stores it into the corresponding candidate's JSON file.
+#### 1.1 Instantiation
 The constructor takes in four arguments and in the following order:
-* Last Name (String)
-* First Name (String)
-* Middle Name (String)
-* Date of Birth (datetime)
+* Last Name (String) _Default: lname
+* First Name (String) _Default: fname
+* Middle Name (String) _Default: mname
+* Date of Birth (datetime) _Default: 1900, 1, 1
 
 To run the module, simply instantiate an instance of the JSON module with  
 ```python
 d = DataStorage("Smith", "Bob", "James", datetime.datetime(1984,6,4)) 
 ```
+A file is then created in the current directory under the inputted arguments. Ex: Smith_Bob_James_840604.json
+
+#### 1.2 Implementation
+The module comes with multiple functions:
+```
+recordData(case={dictionary_of_case_data})
+```
+When provided a list of data pertaining to the candidate's court case, this function will append the case to the candidate's list in the corresponding JSON file.
+
+```
+clearData()
+```
+Will completely wipe all data on the candidate's file.
+
+```
+printData()
+```
+Will print all data in the candidate's file to terminal.
+
+#### 2. Dependencies
+1. python 3
+2. datetime
+
 
 ## Screenshotting and Pre-page Processing
 ### Basic usage
