@@ -93,6 +93,19 @@ Once the keywords are established, the program moves on to filling the fields.  
 * The program would ideally be able to get data from fields like the `Offense Literal`, `Disposition Text`, and other long-form text.  To accomplish this, the model could include a natural language processor trained to identify legal text.  Subsequently, legal text objects could be assigned to the respective keywords using the usual Manhattan distance method.
 
 ## Data Serialization Component
+### 1.  Introduction
+The Data serialization module `dataStorage.py` takes the returned lisit from the Text Parsing module and stores it into the corresponding candidate's JSON file.
+#### 1.1 Basic Usage
+The constructor takes in four arguments and in the following order:
+* Last Name (String)
+* First Name (String)
+* Middle Name (String)
+* Date of Birth (datetime)
+
+To run the module, simply instantiate an instance of the JSON module with  
+```python
+d = DataStorage("Smith", "Bob", "James", datetime.datetime(1984,6,4)) 
+```
 
 ## Screenshotting and Pre-page Processing
 ### Basic usage
