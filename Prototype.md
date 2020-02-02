@@ -93,3 +93,29 @@ Once the keywords are established, the program moves on to filling the fields.  
 * The program would ideally be able to get data from fields like the `Offense Literal`, `Disposition Text`, and other long-form text.  To accomplish this, the model could include a natural language processor trained to identify legal text.  Subsequently, legal text objects could be assigned to the respective keywords using the usual Manhattan distance method.
 
 ## Data Serialization Component
+
+## Screenshotting and Pre-page Processing
+### Basic usage
+#### Instantiation
+```si = ScreenImage() #instantiate new screenimage
+driver = webdriver.Chrome(options=si.ConfigDriver(webdriver.ChromeOptions()))
+```
+Driver requires specific chrome options to perform:
+* --auto-open-devtools-for-tabs - allow access to Command Menu between pages
+* {"prefs",{'download.default_directory': self.ScreenshotLocation+'/',"directory_upgrade": True} - changes chromes default screenshot directory to one in the current working directory for image access.
+#### Clean page
+```
+si.CleanPage(driver=driver) #remove background elements 
+```
+Once driver is navigated to target page, CleanPage() iterates through js elements and hides/disables non-textual elements and removes background colors. Text color is set to black.
+#### Screenshot
+```
+screenshot_path = si.Screenshot(driver=driver) #take screenshot
+```
+Uses Chrome's Command Menu to take a full page screenshot. Screenshots are stored in download directory, which is changed in ChromeOptions config.
+#### Clean up
+```
+si.ClearSession() #delete all screenshots
+driver.quit()
+```
+Deletes screenshots taken during this session.
