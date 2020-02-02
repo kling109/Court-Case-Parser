@@ -97,7 +97,8 @@ Once the keywords are established, the program moves on to filling the fields.  
 ## Screenshotting and Pre-page Processing
 ### Basic usage
 #### Instantiation
-```si = ScreenImage() #instantiate new screenimage
+```
+si = ScreenImage() #instantiate new screenimage
 driver = webdriver.Chrome(options=si.ConfigDriver(webdriver.ChromeOptions()))
 ```
 Driver requires specific chrome options to perform:
