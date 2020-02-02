@@ -97,10 +97,10 @@ Once the keywords are established, the program moves on to filling the fields.  
 The Data serialization module `dataStorage.py` takes the returned list from the Text Parsing module and stores it into the corresponding candidate's JSON file.
 #### 1.1 Instantiation
 The constructor takes in four arguments and in the following order:
-* Last Name (String) _Default: lname
-* First Name (String) _Default: fname
-* Middle Name (String) _Default: mname
-* Date of Birth (datetime) _Default: 1900, 1, 1
+* Last Name (String) _Default: lname_
+* First Name (String) _Default: fname_
+* Middle Name (String) _Default: mname_
+* Date of Birth (datetime) _Default: 1900, 1, 1_
 
 To run the module, simply instantiate an instance of the JSON module with  
 ```python
