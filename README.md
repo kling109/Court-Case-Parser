@@ -1,5 +1,5 @@
 # HireRight-Challenge
-Matt raymond, Trevor Kling, Tristan Chilvers, Miles Milosevich
+Matt Raymond, Trevor Kling, Tristan Chilvers, Miles Milosevich
 
 [Documentation](https://docs.google.com/document/d/1r2WDDGoAmco44TrTyDUzWOjovOC8PYVQNAEehnGUzq8/edit?usp=sharing)
 
