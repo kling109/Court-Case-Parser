@@ -6,7 +6,8 @@ To download this code and run it, make sure you have `git`, Jupyter Notebook, py
 
 ## Navigation Component
 
-## Web Page Formatting Component
+
+
 ### 1.  Introduction
 The navigation component has, at its base, two actions that it performs: finding a given element, and performing an action on that element. Each element has one action that is supposed to be called on it, and all elements are called in the same order, which makes the logic of this problem relatively simple.
 
@@ -206,8 +207,7 @@ Prints the file name to terminal and returns it as a string.
 1. python 3
 2. datetime
 
-
-## Screenshotting and Pre-page Processing
+## Web Page Formatting Component
 ### Basic usage
 #### Instantiation
 ```
@@ -233,3 +233,6 @@ si.ClearSession() #delete all screenshots
 driver.quit()
 ```
 Deletes screenshots taken during this session.
+### Dependencies
+* selenium
+* pyautogui
