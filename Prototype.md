@@ -1,7 +1,80 @@
 # Court Case Parser
+Matt Raymond, Trevor Kling, Miles Milosevich, and Tristan Chilvers
+
+
+To download this code and run it, make sure you have `git`, Jupyter Notebook, python, and all python dependencies installed, open the terminal, enter `git clone https://github.com/kling109/HireRight-Challenge`, wait for the download, enter `jupyter notebook`, navigate to `Python Web Navigation Test.ipynp`, and run all cells.
+
 ## Navigation Component
 
 ## Web Page Formatting Component
+### 1.  Introduction
+The navigation component has, at its base, two actions that it performs: finding a given element, and performing an action on that element. Each element has one action that is supposed to be called on it, and all elements are called in the same order, which makes the logic of this problem relatively simple.
+
+### 1.1 Basic Usage
+This module is currently implimented in an ipython notebook called `Python Web Navigation Test.ipynb`, but could be easily be exported as a `.py` file from Jupyter Notebook.
+
+To run the module, simply call 
+```
+scanAllWebsites(fn = "first_name", ln = "last_name", mn = "middle_name", dob = "mm-dd-yyyy", testing=Bool)
+```
+
+The `mn` and `dob` may be left as empty strings, and `testing` defaults to `False`. This function will cycle through all of the valid websites that it has saved (so websites without captchas or agreements not to scrape the site), scraping the data from every given case and outputting the result to a json file (as described below). If `testing` is true, the scraper will only open the first result from the first page of every website.
+
+Individual websites may be scraped with the command
+```
+scanWebsite(ws = "website_name, fn = "first_name", ln = "last_name", mn = "middle_name", dob = "mm-dd-yyyy", testing = Bool)
+```
+
+The `mn` and `dob` may be left as empty strings, and `testing` defaults to `False`. This function will scrape the data from every case on a website that matches the search criteria and output the result to a json file (as described below). If `testing` is true, the scraper will only open the first result from the first page.
+
+### 1.2 Implementation
+The web navigation is implimented using selenium to navigate and regex to find the elements used in navigation.
+
+Website navigation is broken down into three stages (search page, search results page, and court document page), and as such, any website with a different sequence of pages will NOT work at this time. Each page has a given function that searches for the necessary navigation elements for that page:
+- Search Page
+  - First Name field: Fills with subject's first name
+  - Last Name Field: Fills with subject's last name
+  - Middle Name Field: Fills with subject's middle name
+  - Date of Birth Field: Fills with subject's date of birth
+  - Search button: Clicks to search
+- Search Results Page
+  - Links to court documents: Opens in a new tab
+- Court Document Page
+  - No navigation. Tab is closed to navigate back.
+  
+Additionally, because some court documents don't contain the jurisdiction, on every page the program searches for the county name, which it then passes to the text parsing component.
+
+For a while we were unsure which method we were going to use for screenshots, so we had a couple methods implimented. Currently, we use the developer tools method, which takes one long screenshot, and the other method which stitches together multiple images is depricated and would be removed in future versions.
+
+#### 1.3 Dependencies
+
+```
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+
+from selenium.common.exceptions import TimeoutException
+
+import re as regx
+from time import sleep
+from datetime import datetime
+
+from parse import ImageParsing
+from dataStorage import DataStorage
+from ScreenImage import ScreenImage
+
+# Necessary for depricated screen capture
+import math
+import tempfile
+import os
+from PIL import Image
+```
+
+#### 2.4 Future Improvements
+In the future, we hope to generalize webpage navigation even more so that we can handle websites that do not follow the three-level process that was implimented here (search page, search results page, and court document page). Additionally, we hope to impliment a headless browser that could run a chrome driver on each thread, allowing for a decent level of parallel processing (potentially up to 16 parallel threads for mid-tier machines). Additionally, we would try to bring down some of the latency during navigation due to timeouts and sleep functions, which are annoying but necessary due to our current implimentation.
 
 ## Text Parsing Component
 
@@ -142,8 +215,8 @@ si = ScreenImage() #instantiate new screenimage
 driver = webdriver.Chrome(options=si.ConfigDriver(webdriver.ChromeOptions()))
 ```
 Driver requires specific chrome options to perform:
-* --auto-open-devtools-for-tabs - allow access to Command Menu between pages
-* {"prefs",{'download.default_directory': self.ScreenshotLocation+'/',"directory_upgrade": True} - changes chromes default screenshot directory to one in the current working directory for image access.
+* `--auto-open-devtools-for-tabs` - allow access to Command Menu between pages
+* `{"prefs",{'download.default_directory': self.ScreenshotLocation+'/',"directory_upgrade": True}` - changes chromes default screenshot directory to one in the current working directory for image access.
 #### Clean page
 ```
 si.CleanPage(driver=driver) #remove background elements 
