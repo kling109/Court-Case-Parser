@@ -1,4 +1,4 @@
-# HireRight-Challenge
+# Court Case Parsing
 Matt Raymond, Trevor Kling, Tristan Chilvers, Miles Milosevich
 
 [Documentation](https://docs.google.com/document/d/1r2WDDGoAmco44TrTyDUzWOjovOC8PYVQNAEehnGUzq8/edit?usp=sharing)
